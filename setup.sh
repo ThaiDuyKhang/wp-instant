@@ -3,6 +3,13 @@ set -e
 
 echo "=== WordPress Instant Setup ==="
 
+if [ ! -f ".env" ]; then
+  cp .env.example .env
+  echo "Created .env from .env.example"
+else
+  echo ".env already exists, skipped"
+fi
+
 read -p "Database name: " DB_NAME
 read -p "Database user: " DB_USER
 read -s -p "Database password: " DB_PASS
@@ -56,10 +63,33 @@ else
     --skip-email \
     --allow-root
 
-    echo "Installing bundled plugins..."
-    for zip in /plugins/*.zip; do
-      docker compose exec wpcli wp plugin install "$zip" --activate --allow-root
+  echo "Installing plugins from plugins.txt..."
+
+  if [[ -f plugins.txt ]]; then
+    while read -r plugin; do
+      [[ -z "$plugin" || "$plugin" == \#* ]] && continue
+
+      echo "Installing plugin: $plugin"
+      docker compose exec wpcli wp plugin install "$plugin" --activate --allow-root
+
+    done < plugins.txt
+  else
+    echo "No plugins.txt found, skipping plugin installation."
+  fi
+  
+
+  echo "Checking private plugins..."
+
+  if [[ -d plugins-private ]] && compgen -G "plugins-private/*.zip" > /dev/null; then
+    echo "Installing private plugins..."
+
+    for zip in plugins-private/*.zip; do
+      echo "Installing private plugin: $(basename "$zip")"
+      docker compose exec wpcli wp plugin install "/plugins-private/$(basename "$zip")" --activate --allow-root
     done
+  else
+    echo "No private plugins found, skipping."
+  fi
 
 fi
 
