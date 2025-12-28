@@ -56,8 +56,6 @@ MYSQL_VERSION=8.0
 **Bước 2: Tạo project & chạy setup**
 
 ```bash
-wp-instant new project-name
-cd abc
 ./setup.sh
 ```
 
