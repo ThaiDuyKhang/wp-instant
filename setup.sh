@@ -55,7 +55,17 @@ else
     --admin_email="${ADMIN_EMAIL}" \
     --skip-email \
     --allow-root
+
+    echo "Installing bundled plugins..."
+    for zip in /plugins/*.zip; do
+      docker compose exec wpcli wp plugin install "$zip" --activate --allow-root
+    done
+
 fi
 
 echo "DONE!"
 echo "Open: http://localhost:8080"
+
+echo "Unlinking project from wp-instant Git repository..."
+rm -rf .git
+echo "Git repository has been removed. This project is now standalone."
