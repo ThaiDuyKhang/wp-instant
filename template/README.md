@@ -53,9 +53,11 @@ PHP_VERSION=8.4
 MYSQL_VERSION=8.0
 ```
 
-**Bước 3: Chạy setup (chỉ 1 lần)**
+**Bước 2: Tạo project & chạy setup**
 
 ```bash
+wp-instant new project-name
+cd abc
 ./setup.sh
 ```
 
