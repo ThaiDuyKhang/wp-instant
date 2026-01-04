@@ -3,10 +3,10 @@ set -e
 
 echo "=== WP Instant Init ==="
 
-docker compose up -d
-
 echo "Waiting for MySQL..."
-sleep 15
+until docker compose exec db mysqladmin ping -uroot -proot --silent; do
+  sleep 2
+done
 
 if docker compose exec wpcli wp core is-installed --allow-root >/dev/null 2>&1; then
   echo "WordPress already installed. Skipping."
@@ -34,5 +34,18 @@ docker compose exec wpcli wp core install \
   --admin_email="$ADMIN_EMAIL" \
   --skip-email \
   --allow-root
+
+echo "Installing public plugin..."
+docker compose exec wpcli wp plugin is-installed all-in-one-wp-migration --allow-root \
+  || docker compose exec wpcli wp plugin install all-in-one-wp-migration --activate --allow-root
+
+echo "Installing private plugin..."
+if [[ -f plugins-private/allinonewpmigrationgdriveextension.zip ]]; then
+  docker compose exec wpcli wp plugin is-installed all-in-one-wp-migration-gdrive-extension --allow-root \
+    || docker compose exec wpcli wp plugin install \
+      /plugins-private/allinonewpmigrationgdriveextension.zip \
+      --activate \
+      --allow-root
+fi
 
 echo "DONE"
