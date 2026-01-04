@@ -41,7 +41,8 @@ git clone wp-instant-template project-name
 cd project-name
 ```
 
-**Bước 2: Tạo file .env (tuỳ chọn)**
+**Bước 2: Tạo file .env**
+Sửa thông tin trong file .env.example (tuỳ chọn) trước khi tạo .env
 
 ```bash
 cp .env.example .env
@@ -53,7 +54,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-**Bước 4: Tạo project & chạy setup**
+**Bước 4: Chạy setup**
 
 ```bash
 cd path\project-name
