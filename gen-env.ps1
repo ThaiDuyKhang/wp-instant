@@ -1,8 +1,3 @@
-# Script: gen-env.ps1
-# Tạo .env từ .env.example
-# - DB_NAME = tên folder project
-# - DB_USER / DB_PASS sinh ngẫu nhiên
-
 # Kiểm tra .env.example có tồn tại không
 if (-Not (Test-Path ".env.example")) {
     Write-Error ".env.example not found. Please create it first."
