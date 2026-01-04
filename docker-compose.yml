@@ -1,28 +1,35 @@
 services:
   db:
-    image: mysql:${MYSQL_VERSION:-8.0}
-    container_name: wp_db
+    image: mysql:8.0
+    container_name: ${PROJECT_NAME}_db
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
     volumes:
       - db_data:/var/lib/mysql
 
   wordpress:
-    image: wordpress:php${PHP_VERSION:-8.4}-apache
-    container_name: wp_app
+    image: wp-instant:latest
+    container_name: ${PROJECT_NAME}_app
+    ports:
+      - "${WP_PORT}:80"
     depends_on:
       - db
-    ports:
-      - "8080:80"
     volumes:
       - ./wp:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASS}
 
   wpcli:
-    image: wordpress:cli
-    container_name: wp_cli
+    image: wp-instant:latest
+    container_name: ${PROJECT_NAME}_cli
     depends_on:
       - db
-      - wordpress
     volumes:
       - ./wp:/var/www/html
       - ./plugins-private:/plugins-private
