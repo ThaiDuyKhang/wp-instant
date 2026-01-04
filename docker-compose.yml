@@ -12,6 +12,9 @@ services:
 
   wordpress:
     image: wp-instant:latest
+    build:
+      context: .
+      dockerfile: docker/wordpress/Dockerfile
     container_name: ${PROJECT_NAME}_app
     ports:
       - "${WP_PORT}:80"
@@ -27,6 +30,9 @@ services:
 
   wpcli:
     image: wp-instant:latest
+    build:
+      context: .
+      dockerfile: docker/wordpress/Dockerfile
     container_name: ${PROJECT_NAME}_cli
     depends_on:
       - db
