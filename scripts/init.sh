@@ -8,34 +8,47 @@ until docker compose exec db mysqladmin ping -uroot -proot --silent; do
   sleep 2
 done
 
-# Nếu WP đã cài DB → thoát
-if docker compose exec wpcli wp core is-installed --allow-root >/dev/null 2>&1; then
-  echo "WordPress already installed. Skipping."
-  exit 0
-fi
-
-# Tạo wp-config.php nếu CHƯA có
-if docker compose exec wpcli test -f /var/www/html/wp-config.php; then
-  echo "wp-config.php already exists. Skipping config creation."
+if docker compose exec wpcli wp core is-installed --allow-root --path=/var/www/html >/dev/null 2>&1; then
+  echo "WordPress already installed. Skipping core install."
 else
-  echo "Creating wp-config.php..."
-  docker compose exec wpcli wp config create \
-    --dbname="$DB_NAME" \
-    --dbuser="$DB_USER" \
-    --dbpass="$DB_PASS" \
-    --dbhost="db" \
-    --skip-check \
-    --allow-root
+  echo "Installing WordPress..."
+  docker compose exec wpcli wp core install \
+    --url="$SITE_URL" \
+    --title="$SITE_TITLE" \
+    --admin_user="$ADMIN_USER" \
+    --admin_password="$ADMIN_PASS" \
+    --admin_email="$ADMIN_EMAIL" \
+    --skip-email \
+    --allow-root \
+    --path=/var/www/html
 fi
 
-echo "Installing WordPress..."
-docker compose exec wpcli wp core install \
-  --url="$SITE_URL" \
-  --title="$SITE_TITLE" \
-  --admin_user="$ADMIN_USER" \
-  --admin_password="$ADMIN_PASS" \
-  --admin_email="$ADMIN_EMAIL" \
-  --skip-email \
-  --allow-root
+echo "Installing public plugins..."
+
+if docker compose exec wpcli wp plugin is-installed all-in-one-wp-migration --allow-root --path=/var/www/html >/dev/null 2>&1; then
+  echo "Plugin all-in-one-wp-migration already installed."
+else
+  docker compose exec wpcli wp plugin install all-in-one-wp-migration \
+    --activate \
+    --allow-root \
+    --path=/var/www/html
+fi
+
+PRIVATE_PLUGIN_ZIP="/plugins-private/allinonewpmigrationgdriveextension.zip"
+
+echo "Installing private plugins..."
+
+if docker compose exec wpcli test -f "$PRIVATE_PLUGIN_ZIP"; then
+  if docker compose exec wpcli wp plugin is-installed all-in-one-wp-migration-gdrive-extension --allow-root --path=/var/www/html >/dev/null 2>&1; then
+    echo "Private plugin already installed."
+  else
+    docker compose exec wpcli wp plugin install "$PRIVATE_PLUGIN_ZIP" \
+      --activate \
+      --allow-root \
+      --path=/var/www/html
+  fi
+else
+  echo "Private plugin ZIP not found, skipping."
+fi
 
 echo "DONE"
