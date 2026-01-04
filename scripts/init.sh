@@ -73,7 +73,7 @@ if ! docker compose exec wpcli test -f $WP_PATH/wp-config.php; then
   
   # Add WordPress configuration constants
   echo "Configuring WordPress settings..."
-  docker compose exec wpcli wp config set FS_METHOD 'direct' --raw --allow-root --path=$WP_PATH
+  docker compose exec wpcli wp config set FS_METHOD direct --allow-root --path=$WP_PATH
   docker compose exec wpcli wp config set WP_MEMORY_LIMIT '256M' --allow-root --path=$WP_PATH
   docker compose exec wpcli wp config set WP_MAX_MEMORY_LIMIT '512M' --allow-root --path=$WP_PATH
   docker compose exec wpcli wp config set DISABLE_WP_CRON false --raw --allow-root --path=$WP_PATH
